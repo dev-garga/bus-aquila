@@ -1,5 +1,10 @@
 const CACHE = 'bus-aq-v2';
-const FILES = ['/', '/index.html', '/schedule.json', '/manifest.json'];
+const FILES = [
+  '/bus-aquila/',
+  '/bus-aquila/index.html',
+  '/bus-aquila/schedule.json',
+  '/bus-aquila/manifest.json',
+];
 
 self.addEventListener('install', e =>
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()))
