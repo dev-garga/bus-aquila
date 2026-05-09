@@ -142,6 +142,15 @@
   /* ── Empty state ── */
   .empty { text-align: center; padding: 48px 16px; color: var(--muted); font-size: 14px; line-height: 1.6; }
 
+  /* ── Show more button ── */
+  .show-more {
+    width: 100%; padding: 12px; margin-top: 2px;
+    background: var(--surface); border: none; border-radius: var(--radius);
+    color: var(--accent); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background .15s;
+  }
+  .show-more:active { background: var(--surface2); }
+
   /* ── Section header ── */
   .section-hd {
     font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
@@ -237,6 +246,7 @@ let originStop = 'gran_sasso';
 let destStop   = 'uni';
 let pickerFor  = null;
 let showAllTrips = false;
+let visibleCount = 3;
 
 // Stop definitions
 const STOPS = {
@@ -311,6 +321,7 @@ function setDir(d) {
   } else {
     originStop = 'uni'; destStop = 'gran_sasso';
   }
+  visibleCount = 3;
   updateChips(); render();
 }
 
@@ -355,7 +366,14 @@ function selectStop(s) {
   if (pickerFor === 'origin') originStop = s;
   else destStop = s;
   document.getElementById('modal').classList.remove('open');
+  visibleCount = 3;
   updateChips(); render();
+}
+
+// ── Show more ────────────────────────────────
+function showMore() {
+  visibleCount += 3;
+  render();
 }
 
 // ── Saturday toggle ───────────────────────────
@@ -416,13 +434,14 @@ function render() {
     return;
   }
 
-  const shown = trips.slice(0, 3); // next 3
+  const shown = trips.slice(0, visibleCount);
+  const fromLabel = STOPS[originStop]?.short || originStop;
+  const toLabel   = STOPS[destStop]?.short   || destStop;
+
   container.innerHTML = shown.map((trip, i) => {
     const lb = LINE_LABELS[trip.linea] || { num: '?', sub: '' };
     const [cntTxt, cntClass] = diffLabel(trip.diff) || ['–', 'later'];
     const isNext = i === 0;
-    const fromLabel = STOPS[originStop]?.short || originStop;
-    const toLabel   = STOPS[destStop]?.short   || destStop;
 
     return `
     <div class="card${isNext ? ' next' : ''}">
@@ -442,8 +461,15 @@ function render() {
     </div>`;
   }).join('');
 
-  // Info bar: remaining trips count
-  const remaining = trips.length - 3;
+  // "Show more" button
+  const remaining = trips.length - visibleCount;
+  if (remaining > 0) {
+    container.innerHTML += `<button class="show-more" onclick="showMore()">
+      Mostra altre ${Math.min(remaining, 3)} corse
+    </button>`;
+  }
+
+  // Info bar
   const lastTrip = trips[trips.length - 1];
   document.getElementById('info-bar').textContent =
     remaining > 0
