@@ -1,4 +1,4 @@
-const CACHE = 'bus-aq-v2';
+const CACHE = 'bus-aq-v3';
 const FILES = [
   '/bus-aquila/',
   '/bus-aquila/index.html',

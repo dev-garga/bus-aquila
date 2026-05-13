@@ -5,195 +5,334 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bus AQ</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#0a0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bus AQ">
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22263a;
-    --accent: #4f8ef7;
-    --accent2: #f7934f;
-    --text: #e8eaf0;
-    --muted: #8890a4;
-    --green: #4fc47a;
-    --orange: #f5a623;
-    --red: #f74f4f;
-    --radius: 16px;
+    --bg: #0a0c12;
+    --glass:         rgba(30, 34, 48, 0.55);
+    --glass-strong:  rgba(40, 46, 64, 0.70);
+    --glass-border:  rgba(255, 255, 255, 0.08);
+    --glass-edge:    rgba(255, 255, 255, 0.14);
+    --text:    #f0f2f7;
+    --muted:   rgba(240, 242, 247, 0.58);
+    --mute2:   rgba(240, 242, 247, 0.34);
+    --accent:        #5b95ff;
+    --accent-glow:   rgba(91, 149, 255, 0.40);
+    --accent2:       #ff8e54;
+    --accent2-glow:  rgba(255, 142, 84, 0.40);
+    --green:   #4ed084;
+    --orange:  #ffb547;
+    --red:     #ff6262;
+    --radius:    20px;
+    --radius-sm: 14px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
   body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+    font-weight: 500;
     display: flex; flex-direction: column;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     max-width: 480px; margin: 0 auto;
+    position: relative; overflow-x: hidden;
+  }
+
+  /* Ambient color blobs diffused behind every glass surface */
+  body::before {
+    content: ''; position: fixed; inset: -10%;
+    background:
+      radial-gradient(circle at 15% 12%, rgba(91, 149, 255, 0.40), transparent 45%),
+      radial-gradient(circle at 85% 88%, rgba(255, 142, 84, 0.28), transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(140, 80, 220, 0.18), transparent 55%);
+    filter: blur(40px);
+    z-index: -1; pointer-events: none;
   }
 
   /* ── Header ── */
   header {
-    padding: 20px 20px 12px;
-    display: flex; align-items: center; gap: 10px;
+    padding: 22px 22px 16px;
+    display: flex; align-items: center; gap: 12px;
   }
+  .app-icon { font-size: 26px; line-height: 1; }
+  .app-title { font-size: 18px; font-weight: 700; letter-spacing: -0.015em; line-height: 1; }
+  .app-subtitle { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 500; letter-spacing: 0.01em; }
   .clock {
-    font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto;
+    font-size: 16px; color: var(--text); margin-left: auto;
+    font-variant-numeric: tabular-nums; font-weight: 600; letter-spacing: 0.02em;
   }
 
   /* ── Direction toggle ── */
-  .dir-bar {
-    display: flex; gap: 8px; padding: 0 16px 14px;
-  }
+  .dir-bar { display: flex; gap: 10px; padding: 0 18px 12px; }
   .dir-btn {
-    flex: 1; padding: 12px 8px; border-radius: var(--radius);
-    border: 2px solid transparent; background: var(--surface);
+    flex: 1; padding: 14px 10px;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
     color: var(--muted); font-size: 13px; font-weight: 600;
-    cursor: pointer; transition: all .15s; text-align: center; line-height: 1.3;
+    cursor: pointer; text-align: center; line-height: 1.3;
+    letter-spacing: 0.01em;
+    box-shadow:
+      inset 0 1px 0 var(--glass-edge),
+      0 6px 24px rgba(0, 0, 0, 0.22);
+    transition: all .2s ease;
   }
   .dir-btn.active {
-    background: var(--accent); color: #fff; border-color: var(--accent);
+    background: linear-gradient(180deg, rgba(91, 149, 255, 0.42), rgba(91, 149, 255, 0.18));
+    border-color: rgba(91, 149, 255, 0.55);
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 0 32px var(--accent-glow),
+      0 6px 24px rgba(0, 0, 0, 0.22);
   }
   .dir-btn.active.home {
-    background: var(--accent2); border-color: var(--accent2);
+    background: linear-gradient(180deg, rgba(255, 142, 84, 0.42), rgba(255, 142, 84, 0.18));
+    border-color: rgba(255, 142, 84, 0.55);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 0 32px var(--accent2-glow),
+      0 6px 24px rgba(0, 0, 0, 0.22);
   }
 
-  /* ── Stop selectors ── */
-  .stops-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 0 16px 16px;
-  }
+  /* ── Stop chips ── */
+  .stops-row { display: flex; align-items: center; gap: 10px; padding: 0 18px 16px; }
   .stop-chip {
+    flex: 1; padding: 11px 14px;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
     display: flex; flex-direction: column;
-    background: var(--surface); border-radius: 12px;
-    padding: 10px 14px; flex: 1; cursor: pointer; border: 2px solid transparent;
-    transition: border-color .15s;
+    box-shadow:
+      inset 0 1px 0 var(--glass-edge),
+      0 4px 16px rgba(0, 0, 0, 0.20);
+    transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .stop-chip.active { border-color: var(--accent); }
-  .stop-chip .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+  .stop-chip.active {
+    border-color: rgba(91, 149, 255, 0.40);
+    box-shadow:
+      inset 0 1px 0 var(--glass-edge),
+      0 0 18px var(--accent-glow);
+  }
+  .stop-chip .label { font-size: 10px; color: var(--mute2); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-bottom: 3px; }
   .stop-chip .name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .stop-arrow { color: var(--muted); font-size: 18px; flex-shrink: 0; }
+  .stop-arrow { color: var(--mute2); font-size: 18px; flex-shrink: 0; }
 
-  /* ── Stop picker modal ── */
+  /* ── Modal ── */
   .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7);
+    display: none; position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.50);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
     z-index: 100; align-items: flex-end; justify-content: center;
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--surface); width: 100%; max-width: 480px;
-    border-radius: 20px 20px 0 0; padding: 20px 16px 36px;
-    transform: translateY(100%); transition: transform .25s ease;
+    width: 100%; max-width: 480px;
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-bottom: none;
+    border-radius: 24px 24px 0 0;
+    padding: 20px 14px 36px;
+    transform: translateY(100%);
+    transition: transform .3s cubic-bezier(.32, .72, 0, 1);
+    box-shadow:
+      inset 0 1px 0 var(--glass-edge),
+      0 -12px 40px rgba(0, 0, 0, 0.40);
   }
   .modal-overlay.open .modal { transform: translateY(0); }
-  .modal h3 { font-size: 15px; margin-bottom: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .modal h3 { font-size: 12px; margin-bottom: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 600; padding-left: 8px; }
   .stop-option {
     display: flex; align-items: center; gap: 12px;
-    padding: 14px; border-radius: 12px; cursor: pointer; margin-bottom: 6px;
-    transition: background .1s;
+    padding: 14px 14px; border-radius: 14px; cursor: pointer; margin-bottom: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    transition: all .15s ease;
   }
-  .stop-option:hover, .stop-option:active { background: var(--surface2); }
-  .stop-option.selected { background: var(--surface2); }
+  .stop-option:active { background: rgba(255, 255, 255, 0.06); }
+  .stop-option.selected {
+    background: rgba(91, 149, 255, 0.13);
+    border-color: rgba(91, 149, 255, 0.32);
+  }
   .stop-option .dot {
-    width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--mute2); flex-shrink: 0;
   }
-  .stop-option.selected .dot { background: var(--green); }
+  .stop-option.selected .dot {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
   .stop-option span { font-size: 15px; font-weight: 500; }
 
   /* ── Cards ── */
-  .cards { flex: 1; overflow-y: auto; padding: 0 16px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .cards { flex: 1; overflow-y: auto; padding: 0 18px 24px; display: flex; flex-direction: column; gap: 12px; }
 
   .card {
-    background: var(--surface); border-radius: var(--radius); padding: 16px 18px;
-    display: grid; grid-template-columns: auto 1fr auto;
-    gap: 4px 12px; align-items: center; position: relative;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 4px 12px; align-items: center;
+    position: relative;
+    box-shadow:
+      inset 0 1px 0 var(--glass-edge),
+      0 8px 28px rgba(0, 0, 0, 0.25);
+    transition: opacity .2s ease;
   }
-  .card.next { border: 1px solid rgba(79,142,247,.35); }
+  .card.next {
+    border-color: rgba(91, 149, 255, 0.45);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.20),
+      0 0 28px rgba(91, 149, 255, 0.28),
+      0 8px 28px rgba(0, 0, 0, 0.30);
+  }
+  .card.past { opacity: 0.50; }
 
   .linea-badge {
-    grid-row: span 2; background: var(--surface2); border-radius: 10px;
-    padding: 8px 10px; text-align: center; min-width: 48px;
+    grid-row: span 2;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 8px 12px; text-align: center; min-width: 52px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
-  .linea-badge .num { font-size: 18px; font-weight: 800; color: var(--accent); line-height: 1; }
-  .linea-badge .sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .linea-badge .num { font-size: 20px; font-weight: 800; color: var(--accent); line-height: 1; letter-spacing: -0.02em; }
+  .linea-badge .sub { font-size: 10px; color: var(--muted); margin-top: 3px; font-weight: 600; letter-spacing: 0.06em; }
 
-  .times { display: flex; align-items: baseline; gap: 6px; }
-  .dep-time { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .arr-label { font-size: 12px; color: var(--muted); }
-  .arr-time { font-size: 14px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
-
-  .stop-names { font-size: 11px; color: var(--muted); }
+  .times { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; min-width: 0; }
+  .dep-time { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .arr-label { font-size: 10px; color: var(--mute2); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+  .arr-time { font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .stop-names { font-size: 11px; color: var(--mute2); font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .countdown {
-    grid-row: span 2; text-align: right;
-    font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    grid-row: span 2; text-align: center;
+    font-size: 12px; font-weight: 700;
+    padding: 6px 10px; border-radius: 999px;
     white-space: nowrap; align-self: center;
+    border: 1px solid transparent;
+    letter-spacing: 0.01em;
+    justify-self: end;
   }
-  .countdown.now { color: var(--green); background: rgba(79,196,122,.12); }
-  .countdown.soon { color: var(--orange); background: rgba(245,166,35,.12); }
-  .countdown.later { color: var(--muted); background: var(--surface2); }
+  .countdown.now {
+    color: var(--green);
+    background: rgba(78, 208, 132, 0.14);
+    border-color: rgba(78, 208, 132, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 0 18px rgba(78, 208, 132, 0.22);
+  }
+  .countdown.soon {
+    color: var(--orange);
+    background: rgba(255, 181, 71, 0.13);
+    border-color: rgba(255, 181, 71, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .countdown.later {
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+  .countdown.past {
+    color: var(--mute2);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 12px; font-weight: 600;
+  }
 
-  .scolastica-tag {
-    position: absolute; top: 10px; right: 10px;
-    font-size: 10px; color: var(--muted); background: var(--surface2);
-    padding: 2px 6px; border-radius: 8px;
+  .scolastica-tag, .feriale-tag {
+    position: absolute; top: 9px; right: 10px;
+    font-size: 9px; padding: 3px 7px; border-radius: 999px;
+    font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    border: 1px solid transparent;
   }
+  .scolastica-tag { color: var(--muted); background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.05); }
+  .feriale-tag { color: var(--orange); background: rgba(255, 181, 71, 0.10); border-color: rgba(255, 181, 71, 0.22); }
 
   /* ── Empty state ── */
-  .empty { text-align: center; padding: 48px 16px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .empty { text-align: center; padding: 56px 16px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .empty strong { color: var(--text); font-weight: 700; display: block; margin-bottom: 6px; font-size: 17px; letter-spacing: -0.01em; }
+  .empty .empty-icon { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.7; }
 
-  /* ── Show more button ── */
-  .show-more {
-    width: 100%; padding: 12px; margin-top: 2px;
-    background: var(--surface); border: none; border-radius: var(--radius);
-    color: var(--accent); font-size: 13px; font-weight: 600;
-    cursor: pointer; transition: background .15s;
+  /* ── Glass buttons (show more / show past) ── */
+  .show-more, .show-past {
+    width: 100%; padding: 13px 16px;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    color: var(--accent);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; letter-spacing: 0.01em;
+    box-shadow:
+      inset 0 1px 0 var(--glass-edge),
+      0 4px 18px rgba(0, 0, 0, 0.20);
+    transition: background .15s ease;
   }
-  .show-more:active { background: var(--surface2); }
-
-  /* ── Section header ── */
-  .section-hd {
-    font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
-    color: var(--muted); margin: 4px 0 8px; padding: 0 2px;
+  .show-past {
+    color: var(--mute2); font-size: 12px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.025);
   }
+  .show-more:active, .show-past:active { background: rgba(255, 255, 255, 0.06); }
 
-  /* ── Saturday banner ── */
+  /* ── Day banner ── */
   .day-banner {
-    margin: 0 16px 12px;
-    padding: 10px 14px;
-    background: rgba(245,166,35,.1);
-    border: 1px solid rgba(245,166,35,.25);
-    border-radius: 12px;
-    font-size: 12px;
+    margin: 0 18px 14px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(255, 181, 71, 0.18), rgba(255, 181, 71, 0.08));
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 181, 71, 0.28);
+    border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 600;
     color: var(--orange);
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    box-shadow: inset 0 1px 0 rgba(255, 181, 71, 0.18);
+  }
+  .day-banner.sunday {
+    background: linear-gradient(180deg, rgba(255, 98, 98, 0.18), rgba(255, 98, 98, 0.08));
+    border-color: rgba(255, 98, 98, 0.28);
+    color: var(--red);
+    box-shadow: inset 0 1px 0 rgba(255, 98, 98, 0.18);
   }
   .day-banner-toggle {
-    font-size: 11px; font-weight: 600;
-    background: none; border: 1px solid currentColor;
-    color: inherit; padding: 3px 8px; border-radius: 8px;
+    font-size: 11px; font-weight: 700;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid currentColor;
+    color: inherit;
+    padding: 5px 11px; border-radius: 999px;
     cursor: pointer; white-space: nowrap; flex-shrink: 0;
-  }
-
-  .feriale-tag {
-    position: absolute; top: 10px; right: 10px;
-    font-size: 10px; color: var(--orange); background: rgba(245,166,35,.12);
-    padding: 2px 6px; border-radius: 8px;
+    letter-spacing: 0.02em;
   }
 
   /* ── Info bar ── */
   .info-bar {
-    padding: 0 18px 20px; font-size: 11px; color: var(--muted); line-height: 1.5; text-align: center;
+    padding: 4px 20px 20px; font-size: 11px; color: var(--mute2); line-height: 1.5; text-align: center;
+    font-weight: 500;
   }
 </style>
 </head>
 <body>
 
 <header>
-  <span style="font-size:22px">🚌</span>
+  <span class="app-icon">&#x1F68C;</span>
   <div>
-    <div style="font-size:17px;font-weight:700;line-height:1">Bus AQ</div>
-    <div style="font-size:11px;color:var(--muted)">AMA L'Aquila</div>
+    <div class="app-title">Bus AQ</div>
+    <div class="app-subtitle">AMA L'Aquila</div>
   </div>
   <div class="clock" id="clock">--:--</div>
 </header>
@@ -220,12 +359,12 @@
 </div>
 
 <div class="day-banner" id="day-banner" style="display:none">
-  <span>&#x1F4C5; Sabato · corse ridotte</span>
+  <span id="day-banner-text">&#x1F4C5; Sabato &middot; corse ridotte</span>
   <button class="day-banner-toggle" id="day-banner-toggle" onclick="toggleShowAll()">Mostra tutte</button>
 </div>
 
 <div class="cards" id="cards">
-  <div class="empty">Caricamento orari…</div>
+  <div class="empty">Caricamento orari&hellip;</div>
 </div>
 
 <div class="info-bar" id="info-bar"></div>
@@ -241,23 +380,21 @@
 <script>
 // ── Data & state ──────────────────────────────
 let schedule = null;
-let dir = 'uni';       // 'uni' | 'home'
+let dir = 'uni';
 let originStop = 'gran_sasso';
 let destStop   = 'uni';
 let pickerFor  = null;
 let showAllTrips = false;
+let showPast = false;
 let visibleCount = 3;
 
-// Stop definitions
 const STOPS = {
-  gran_sasso:    { label: 'Viale Gran Sasso',    short: 'Gran Sasso' },
+  gran_sasso:    { label: 'Viale Gran Sasso',     short: 'Gran Sasso' },
   terminal:      { label: 'Terminal Collemaggio', short: 'Collemaggio' },
-  aquilone:      { label: "L'Aquilone",           short: 'Aquilone' },
-  uni:           { label: 'Univ. Coppito',        short: 'Coppito' },
+  aquilone:      { label: "L'Aquilone",            short: 'Aquilone' },
+  uni:           { label: 'Univ. Coppito',         short: 'Coppito' },
 };
 
-// Which schedule keys to use for each origin→dest pair
-// key = `${origin}_${dest}` or a direction key inside each line
 const ROUTE_KEYS = {
   'gran_sasso_uni':  { keys: ['to_uni'] },
   'uni_gran_sasso':  { keys: ['to_home'] },
@@ -275,21 +412,19 @@ const LINE_LABELS = {
 };
 
 // ── Helpers ───────────────────────────────────
-function toMin(hhmm) {
-  const [h, m] = hhmm.split(':').map(Number);
-  return h * 60 + m;
-}
-function nowMin() {
-  const n = new Date();
-  return n.getHours() * 60 + n.getMinutes();
-}
+function toMin(hhmm) { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; }
+function nowMin() { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); }
 function fmt(hhmm) { return hhmm; }
 function diffLabel(diff) {
-  if (diff < 0) return null;
-  if (diff === 0) return ['Ora', 'now'];
-  if (diff < 2)  return ['1 min', 'now'];
-  if (diff < 60) return [`${diff} min`, diff < 10 ? 'now' : 'soon'];
-  const h = Math.floor(diff/60), m = diff % 60;
+  if (diff >= -2 && diff < 2) return ['Ora', 'now'];
+  if (diff < 0) {
+    const m = -diff;
+    if (m < 60) return [`${m}m fa`, 'past'];
+    const h = Math.floor(m / 60), rest = m % 60;
+    return [rest > 0 ? `${h}h ${rest}m fa` : `${h}h fa`, 'past'];
+  }
+  if (diff < 60)  return [`${diff} min`, diff < 10 ? 'now' : 'soon'];
+  const h = Math.floor(diff / 60), m = diff % 60;
   return [m > 0 ? `${h}h ${m}m` : `${h}h`, 'later'];
 }
 
@@ -299,7 +434,7 @@ fetch('schedule.json')
   .then(data => { schedule = data; render(); setInterval(render, 30000); })
   .catch(() => {
     document.getElementById('cards').innerHTML =
-      '<div class="empty">Impossibile caricare gli orari.<br>Riprova dopo aver ripristinato la connessione.</div>';
+      '<div class="empty"><span class="empty-icon">&#x26A0;&#xFE0F;</span><strong>Errore di rete</strong>Impossibile caricare gli orari.<br>Riprova dopo aver ripristinato la connessione.</div>';
   });
 
 // ── Clock ─────────────────────────────────────
@@ -315,13 +450,9 @@ function setDir(d) {
   dir = d;
   document.getElementById('btn-uni').classList.toggle('active', d === 'uni');
   document.getElementById('btn-home').classList.toggle('active', d === 'home');
-  // Reset stops to default for each direction
-  if (d === 'uni') {
-    originStop = 'gran_sasso'; destStop = 'uni';
-  } else {
-    originStop = 'uni'; destStop = 'gran_sasso';
-  }
-  visibleCount = 3;
+  if (d === 'uni') { originStop = 'gran_sasso'; destStop = 'uni'; }
+  else             { originStop = 'uni'; destStop = 'gran_sasso'; }
+  visibleCount = 3; showPast = false;
   updateChips(); render();
 }
 
@@ -341,19 +472,16 @@ function openPicker(which) {
   const opts = which === 'origin'
     ? (dir === 'uni' ? ORIGIN_OPTS_UNI : ORIGIN_OPTS_HOME)
     : (dir === 'uni' ? DEST_OPTS_UNI   : DEST_OPTS_HOME);
-
-  if (opts.length <= 1) return; // nothing to choose
+  if (opts.length <= 1) return;
 
   const current = which === 'origin' ? originStop : destStop;
   document.getElementById('modal-title').textContent =
     which === 'origin' ? 'Fermata di partenza' : 'Fermata di arrivo';
-
   document.getElementById('modal-options').innerHTML = opts.map(s => `
     <div class="stop-option ${s === current ? 'selected' : ''}" onclick="selectStop('${s}')">
       <div class="dot"></div>
       <span>${STOPS[s].label}</span>
     </div>`).join('');
-
   document.getElementById('modal').classList.add('open');
 }
 
@@ -363,36 +491,37 @@ function closePicker(e) {
 }
 
 function selectStop(s) {
-  if (pickerFor === 'origin') originStop = s;
-  else destStop = s;
+  if (pickerFor === 'origin') originStop = s; else destStop = s;
   document.getElementById('modal').classList.remove('open');
-  visibleCount = 3;
+  visibleCount = 3; showPast = false;
   updateChips(); render();
 }
 
-// ── Show more ────────────────────────────────
-function showMore() {
-  visibleCount += 3;
-  render();
-}
+// ── Show more / Show past ─────────────────────
+function showMore() { visibleCount += 3; render(); }
+function togglePast() { showPast = !showPast; render(); }
 
-// ── Saturday toggle ───────────────────────────
+// ── Saturday "show all" toggle ────────────────
 function toggleShowAll() {
   showAllTrips = !showAllTrips;
   document.getElementById('day-banner-toggle').textContent = showAllTrips ? 'Solo sabato' : 'Mostra tutte';
   render();
 }
 
-// ── Render trips ──────────────────────────────
+// ── Trips computation ─────────────────────────
 function getTrips() {
-  if (!schedule) return [];
+  if (!schedule) return { past: [], future: [] };
+  const day = new Date().getDay();
+  if (day === 0) return { past: [], future: [] }; // Sunday → no service
+
   const routeKey = `${originStop}_${destStop}`;
   const def = ROUTE_KEYS[routeKey];
-  if (!def) return [];
+  if (!def) return { past: [], future: [] };
 
   const now = nowMin();
-  const isSaturday = new Date().getDay() === 6;
-  const all = [];
+  const isSaturday = day === 6;
+  const past = [];
+  const future = [];
 
   for (const [lineKey, lineData] of Object.entries(schedule)) {
     for (const key of def.keys) {
@@ -402,49 +531,96 @@ function getTrips() {
         if (isSaturday && trip.no_saturday && !showAllTrips) continue;
         const depMin = toMin(trip.dep);
         const diff = depMin - now;
-        if (diff < -2) continue; // already departed (allow 2 min grace)
-        all.push({
+        const entry = {
           dep: trip.dep, arr: trip.arr,
           linea: lineKey,
           variant: trip.linea || null,
           scolastica: trip.scolastica,
           no_saturday: trip.no_saturday,
           depMin, diff
-        });
+        };
+        if (diff < -2) {
+          if (diff > -60) past.push(entry); // keep up to 1h ago
+        } else {
+          future.push(entry);
+        }
       }
     }
   }
-  // Sort by departure
-  all.sort((a, b) => a.depMin - b.depMin || a.linea.localeCompare(b.linea));
-  return all;
+  const sorter = (a, b) => a.depMin - b.depMin || a.linea.localeCompare(b.linea);
+  past.sort(sorter); future.sort(sorter);
+  return { past, future };
 }
 
+// ── Render ────────────────────────────────────
 function render() {
   if (!schedule) return;
-  const isSaturday = new Date().getDay() === 6;
+  const day = new Date().getDay();
+  const isSunday = day === 0;
+  const isSaturday = day === 6;
+
+  // Banner
   const banner = document.getElementById('day-banner');
-  banner.style.display = isSaturday ? 'flex' : 'none';
+  const bannerText = document.getElementById('day-banner-text');
+  const bannerToggle = document.getElementById('day-banner-toggle');
+  if (isSunday) {
+    banner.style.display = 'flex';
+    banner.classList.add('sunday');
+    bannerText.innerHTML = '\u{1F6AB} Domenica · servizio non attivo';
+    bannerToggle.style.display = 'none';
+  } else if (isSaturday) {
+    banner.style.display = 'flex';
+    banner.classList.remove('sunday');
+    bannerText.innerHTML = '\u{1F4C5} Sabato · corse ridotte';
+    bannerToggle.style.display = '';
+  } else {
+    banner.style.display = 'none';
+  }
 
-  const trips = getTrips();
   const container = document.getElementById('cards');
+  const infoBar = document.getElementById('info-bar');
 
-  if (trips.length === 0) {
-    container.innerHTML = '<div class="empty">Nessuna corsa disponibile nei prossimi orari.<br>Controlla domani mattina!</div>';
-    document.getElementById('info-bar').textContent = '';
+  if (isSunday) {
+    container.innerHTML = '<div class="empty"><span class="empty-icon">\u{1F634}</span><strong>Domenica · nessun bus</strong>AMA non effettua corse di domenica.<br>Riprova lunedì mattina!</div>';
+    infoBar.textContent = '';
     return;
   }
 
-  const shown = trips.slice(0, visibleCount);
+  const { past, future } = getTrips();
+
+  if (future.length === 0 && past.length === 0) {
+    container.innerHTML = '<div class="empty"><span class="empty-icon">\u{1F4A4}</span><strong>Nessuna corsa</strong>Non ci sono altre corse oggi.<br>Controlla domani mattina!</div>';
+    infoBar.textContent = '';
+    return;
+  }
+
+  let html = '';
+
+  // "Show past" button at top
+  if (past.length > 0) {
+    const recentCount = Math.min(past.length, 3);
+    html += `<button class="show-past" onclick="togglePast()">${
+      showPast ? '↓ Nascondi precedenti' : `↑ Mostra ${recentCount} corse precedenti`
+    }</button>`;
+  }
+
+  // Build the list: past (if showing) + future
+  const tripsToShow = [];
+  if (showPast) tripsToShow.push(...past.slice(-3));
+  const firstFutureIdx = tripsToShow.length;
+  tripsToShow.push(...future.slice(0, visibleCount));
+
   const fromLabel = STOPS[originStop]?.short || originStop;
   const toLabel   = STOPS[destStop]?.short   || destStop;
 
-  container.innerHTML = shown.map((trip, i) => {
+  html += tripsToShow.map((trip, i) => {
+    const isPast = trip.diff < -2;
     const lb = LINE_LABELS[trip.linea] || { num: '?', sub: '' };
     const [cntTxt, cntClass] = diffLabel(trip.diff) || ['–', 'later'];
-    const isNext = i === 0;
+    const isNext = !isPast && i === firstFutureIdx;
 
     return `
-    <div class="card${isNext ? ' next' : ''}">
+    <div class="card${isNext ? ' next' : ''}${isPast ? ' past' : ''}">
       <div class="linea-badge">
         <div class="num">${lb.num}</div>
         ${trip.variant ? `<div class="sub">${trip.variant}</div>` : (lb.sub ? `<div class="sub">${lb.sub}</div>` : '')}
@@ -461,20 +637,23 @@ function render() {
     </div>`;
   }).join('');
 
-  // "Show more" button
-  const remaining = trips.length - visibleCount;
+  // Show more button
+  const remaining = future.length - visibleCount;
   if (remaining > 0) {
-    container.innerHTML += `<button class="show-more" onclick="showMore()">
-      Mostra altre ${Math.min(remaining, 3)} corse
-    </button>`;
+    html += `<button class="show-more" onclick="showMore()">Mostra altre ${Math.min(remaining, 3)} corse</button>`;
   }
 
+  container.innerHTML = html;
+
   // Info bar
-  const lastTrip = trips[trips.length - 1];
-  document.getElementById('info-bar').textContent =
-    remaining > 0
+  const lastTrip = future[future.length - 1];
+  if (lastTrip) {
+    infoBar.textContent = remaining > 0
       ? `+${remaining} cors${remaining === 1 ? 'a' : 'e'} fino alle ${lastTrip.dep}`
       : `Ultima corsa alle ${lastTrip.dep}`;
+  } else {
+    infoBar.textContent = '';
+  }
 }
 
 // ── Service Worker ────────────────────────────
